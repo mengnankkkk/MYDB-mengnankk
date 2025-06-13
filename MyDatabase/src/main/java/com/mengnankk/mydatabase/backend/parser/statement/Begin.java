@@ -1,0 +1,5 @@
+package com.mengnankk.mydatabase.backend.parser.statement;
+
+public class Begin {
+    public boolean isRepeatableRead;
+}
