@@ -18,7 +18,7 @@ public interface Logger {
     void rewind();
     void close();
 
-    public static Logger create(String path) {
+    public static Logger create(String path,FlushStrategy strategy) {
         File f = new File(path+LoggerImpl.LOG_SUFFIX);
         try {
             if(!f.createNewFile()) {
@@ -49,10 +49,10 @@ public interface Logger {
             Panic.panic(e);
         }
 
-        return new LoggerImpl(raf, fc, 0);
+        return new LoggerImpl(raf, fc, 0,strategy);
     }
 
-    public static Logger open(String path) {
+    public static Logger open(String path,FlushStrategy strategy) {
         File f = new File(path+LoggerImpl.LOG_SUFFIX);
         if(!f.exists()) {
             Panic.panic(Error.FileNotExistsException);
@@ -70,7 +70,7 @@ public interface Logger {
            Panic.panic(e);
         }
 
-        LoggerImpl lg = new LoggerImpl(raf, fc);
+        LoggerImpl lg = new LoggerImpl(raf, fc,0,strategy);
         lg.init();
 
         return lg;

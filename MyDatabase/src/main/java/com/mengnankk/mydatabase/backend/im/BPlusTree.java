@@ -20,6 +20,13 @@ public class BPlusTree {
     long bootUid;
     DataItem bootDataItem;
     Lock bootLock;
+    private final NodeCache nodeCache;
+
+    public BPlusTree() {
+        nodeCache = new NodeCache(1000);
+    }
+
+
 
     public static long create(DataManager dm) throws Exception {
         byte[] rawRoot = Node.newNilRootRaw();
@@ -36,6 +43,23 @@ public class BPlusTree {
         t.bootDataItem = bootDataItem;
         t.bootLock = new ReentrantLock();
         return t;
+    }
+
+    /**
+     * 从缓存加载，缓存没有则再从磁盘读
+     * @param nodeUid
+     * @return
+     * @throws Exception
+     */
+    public Node loadNode(long nodeUid) throws Exception{
+        Node cacheNode = nodeCache.get(nodeUid);
+        if (cacheNode!=null){
+            return cacheNode;
+        }
+        Node node = Node.loadNode(this,nodeUid);
+        nodeCache.put(nodeUid,node);
+        return node;
+
     }
 
     private long rootUid() {
@@ -158,5 +182,6 @@ public class BPlusTree {
 
     public void close() {
         bootDataItem.release();
+        nodeCache.clear();
     }
 }

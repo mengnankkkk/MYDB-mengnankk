@@ -56,4 +56,41 @@ public class Parser {
         return res;
     }
 
+    /**
+     * encode long value 为 VarInt 返回写入字节长度
+     * @param value
+     * @param buf
+     * @param offset
+     * @return
+     */
+    public static int encodeVarInt(long value,byte[] buf,int offset){
+        int pos = offset;
+        while ((value&~0x7FL)!=0){
+            buf[pos++] = (byte) ((value&0x7F)|0x80);
+            value >>>=7;
+        }
+        buf[pos++] = (byte) value;
+        return pos-offset;
+    }
+
+    /**
+     * decode VarInt，从 offset 读取，返回实际值并将读取长度存入 outSize[0]
+     * @param buf
+     * @param offset
+     * @param outsize
+     * @return
+     */
+    public static long decodeVarInt(byte[] buf,int offset,int[] outsize){
+        long result = 0;
+        int shift = 0,pos = offset;
+        while (true){
+            byte b = buf[pos++];
+            result |=(long)(b&0x7F)<<shift;
+            if ((b&0x80)==0) break;
+            shift +=7;
+        }
+        outsize[0] = pos-offset;
+        return result;
+    }
+
 }
